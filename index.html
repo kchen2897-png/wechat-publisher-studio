@@ -20,6 +20,7 @@
         <button class="ghost" id="pasteBtn" type="button">粘贴代码</button>
         <button class="ghost" id="sampleHtmlBtn" type="button">HTML示例</button>
         <button class="ghost" id="sampleMdBtn" type="button">Markdown示例</button>
+        <button class="ghost" id="sampleMixedBtn" type="button">混合示例</button>
         <button class="primary" id="copyRichBtn" type="button">复制到公众号</button>
       </div>
     </header>
@@ -29,15 +30,30 @@
         <div class="panel-head">
           <div>
             <h2>输入代码</h2>
-            <p>粘贴完整 HTML、带 CSS 的代码片段、Markdown 或普通正文。</p>
+            <p>粘贴完整 HTML、带 CSS 的代码片段、Markdown、混合内容或普通正文。</p>
           </div>
           <span id="stateText">等待输入</span>
         </div>
+
+        <section class="title-box">
+          <label class="field title-field">
+            <span>文章标题</span>
+            <textarea id="articleTitleInput" rows="2" placeholder="这里单独填写公众号文章标题，可随时修改"></textarea>
+          </label>
+          <div class="title-actions">
+            <button class="ghost" id="copyTitleBtn" type="button">复制标题</button>
+            <label class="check compact">
+              <input id="showTitleToggle" type="checkbox">
+              <span>同时显示在正文顶部</span>
+            </label>
+          </div>
+        </section>
 
         <div class="control-grid">
           <label class="field">
             <span>输入类型</span>
             <select id="modeSelect">
+              <option value="mixed">智能混合：HTML + Markdown</option>
               <option value="html">HTML / CSS 代码</option>
               <option value="markdown">Markdown 正文</option>
               <option value="text">纯文本分段</option>
@@ -71,7 +87,7 @@
 
         <label class="field code-field">
           <span>代码 / 正文</span>
-          <textarea id="sourceInput" spellcheck="false" placeholder="把 HTML、CSS、Markdown 或纯文本粘贴到这里..."></textarea>
+          <textarea id="sourceInput" spellcheck="false" placeholder="把 HTML、CSS、Markdown、混合代码或纯文本粘贴到这里..."></textarea>
         </label>
 
         <div class="button-row">
@@ -84,10 +100,10 @@
         <aside class="tips">
           <h3>怎么用</h3>
           <ol>
-            <li>把代码粘到左侧，点击“转换预览”。</li>
-            <li>确认右侧预览效果。</li>
-            <li>点击“复制到公众号”。</li>
-            <li>到微信公众平台正文编辑区按 <kbd>Ctrl</kbd> + <kbd>V</kbd>。</li>
+            <li>标题填在“文章标题”，正文代码粘到“代码 / 正文”。</li>
+            <li>如果内容里既有 HTML 又有 Markdown，选择“智能混合”。</li>
+            <li>点击“转换预览”，确认右侧效果。</li>
+            <li>点击“复制到公众号”，到微信公众平台正文编辑区按 <kbd>Ctrl</kbd> + <kbd>V</kbd>。</li>
           </ol>
           <p>注意：公众号封面图仍需在后台单独上传；正文里的本地图片路径通常无法直接带过去。</p>
         </aside>
@@ -105,8 +121,13 @@
           </div>
         </div>
 
+        <div class="title-preview">
+          <b>文章标题</b>
+          <p id="articleTitlePreview">未填写标题</p>
+        </div>
+
         <div class="notice" id="notice">
-          已为你准备好通用转换器。粘贴代码后，右侧会生成可复制的富文本。
+          已准备好通用转换器。粘贴代码后，右侧会生成可复制的富文本。
         </div>
 
         <div class="phone-shell">

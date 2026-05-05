@@ -7,6 +7,9 @@ const els = {
   inline: $("inlineToggle"),
   frame: $("frameToggle"),
   source: $("sourceInput"),
+  articleTitle: $("articleTitleInput"),
+  articleTitlePreview: $("articleTitlePreview"),
+  showTitle: $("showTitleToggle"),
   output: $("wechatOutput"),
   hidden: $("hiddenRender"),
   notice: $("notice"),
@@ -15,6 +18,8 @@ const els = {
   paste: $("pasteBtn"),
   sampleHtml: $("sampleHtmlBtn"),
   sampleMd: $("sampleMdBtn"),
+  sampleMixed: $("sampleMixedBtn"),
+  copyTitle: $("copyTitleBtn"),
   convert: $("convertBtn"),
   copyRich: $("copyRichBtn"),
   copyRich2: $("copyRichBtn2"),
@@ -78,6 +83,28 @@ const sampleMarkdown = `# 普通人如何读懂财经新闻？
 | 风险在哪里 | 避免只看好处 |
 
 **提醒：** 公众号后台请粘贴“复制到公众号”得到的富文本，不要直接粘贴代码。`;
+
+const sampleMixed = `<style>
+  .note { padding: 16px; border-radius: 14px; background: #f4faf8; border: 1px solid #d8e9e5; }
+  .note strong { color: #12665f; }
+</style>
+
+## 今天先看懂一个概念
+
+这段是 Markdown，下面穿插一块 HTML 卡片。
+
+<div class="note">
+  <p><strong>人话解释：</strong>利率可以理解成“钱的租金”。</p>
+  <p>借钱要付租金，存钱相当于把钱租给别人。</p>
+</div>
+
+> 混合模式适合 AI 生成的一半是 Markdown、一半是 HTML/CSS 的内容。
+
+| 内容类型 | 会怎么处理 |
+|---|---|
+| Markdown 小标题 | 自动变成公众号小标题 |
+| HTML 卡片 | 保留结构并尽量内联样式 |
+| CSS 样式 | 尽量转成可复制的内联样式 |`;
 
 const defaultHtml = `
   <section style="padding:30px 24px;">
@@ -204,6 +231,90 @@ function extractHtmlParts(input) {
     : cleaned;
 
   return { html: bodyHtml, css: styles };
+}
+
+function extractStyleBlocks(input) {
+  let css = "";
+  const content = input.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (_match, styleText) => {
+    css += `${styleText}\n`;
+    return "\n";
+  });
+  return { css, content };
+}
+
+function countTag(buffer, tagName) {
+  const open = new RegExp(`<${tagName}(\\s|>|/)`, "gi");
+  const close = new RegExp(`</${tagName}>`, "gi");
+  return (buffer.match(open) || []).length - (buffer.match(close) || []).length;
+}
+
+function splitMixedSegments(input) {
+  const blockTags = new Set([
+    "article", "aside", "blockquote", "div", "figure", "footer", "header",
+    "h1", "h2", "h3", "h4", "h5", "h6", "hr", "img", "li", "main", "ol",
+    "p", "pre", "section", "table", "tbody", "td", "tfoot", "th", "thead",
+    "tr", "ul"
+  ]);
+  const voidTags = new Set(["br", "hr", "img", "input", "meta", "link"]);
+  const lines = input.replace(/\r\n/g, "\n").split("\n");
+  const segments = [];
+  let mdLines = [];
+  let htmlLines = [];
+  let htmlTag = "";
+
+  const flushMd = () => {
+    const text = mdLines.join("\n").trim();
+    if (text) segments.push({ type: "markdown", content: text });
+    mdLines = [];
+  };
+
+  const flushHtml = () => {
+    const text = htmlLines.join("\n").trim();
+    if (text) segments.push({ type: "html", content: text });
+    htmlLines = [];
+    htmlTag = "";
+  };
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+
+    if (htmlLines.length) {
+      htmlLines.push(line);
+      if (!htmlTag || countTag(htmlLines.join("\n"), htmlTag) <= 0) {
+        flushHtml();
+      }
+      return;
+    }
+
+    const start = trimmed.match(/^<([a-z][\w:-]*)(\s|>|\/)/i);
+    if (start && blockTags.has(start[1].toLowerCase())) {
+      flushMd();
+      htmlTag = start[1].toLowerCase();
+      htmlLines.push(line);
+      if (voidTags.has(htmlTag) || trimmed.endsWith("/>") || countTag(htmlLines.join("\n"), htmlTag) <= 0) {
+        flushHtml();
+      }
+      return;
+    }
+
+    mdLines.push(line);
+  });
+
+  flushHtml();
+  flushMd();
+  return segments;
+}
+
+function convertMixed(input) {
+  const cleaned = unwrapFencedCode(input);
+  const { css, content } = extractStyleBlocks(cleaned);
+  const segments = splitMixedSegments(content);
+  const html = segments.map((segment) => {
+    if (segment.type === "html") return segment.content;
+    return renderMarkdown(segment.content);
+  }).join("\n");
+
+  return convertHtml(`${css ? `<style>${css}</style>` : ""}${html}`);
 }
 
 function shouldSkipStyle(prop, value, tagName) {
@@ -456,24 +567,43 @@ function wrapForWechat(html) {
   `;
 }
 
+function renderArticleTitle(title) {
+  if (!title) return "";
+  return `
+    <section style="margin:0 0 22px;padding:0 0 18px;border-bottom:1px solid #dfecea;">
+      <h1 style="margin:0;color:#132f33;font-size:28px;line-height:1.35;font-weight:900;letter-spacing:0;">${inlineMarkdown(title)}</h1>
+    </section>
+  `;
+}
+
 function convert() {
   const source = els.source.value.trim();
   const mode = els.mode.value;
+  const articleTitle = els.articleTitle.value.trim();
+
+  els.articleTitlePreview.textContent = articleTitle || "未填写标题";
 
   if (!source) {
-    els.output.innerHTML = defaultHtml;
+    const titleHtml = els.showTitle.checked ? renderArticleTitle(articleTitle) : "";
+    els.output.innerHTML = titleHtml ? wrapForWechat(titleHtml) : defaultHtml;
     els.output.style.width = `${els.width.value}px`;
     setState("等待输入");
     return;
   }
 
   let html = "";
-  if (mode === "html") {
+  if (mode === "mixed") {
+    html = convertMixed(source);
+  } else if (mode === "html") {
     html = convertHtml(source);
   } else if (mode === "markdown") {
     html = renderMarkdown(source);
   } else {
     html = renderPlainText(source);
+  }
+
+  if (els.showTitle.checked && articleTitle) {
+    html = `${renderArticleTitle(articleTitle)}${html}`;
   }
 
   els.output.style.width = `${els.width.value}px`;
@@ -543,6 +673,8 @@ function saveDraft() {
     sanitize: els.sanitize.checked,
     inline: els.inline.checked,
     frame: els.frame.checked,
+    articleTitle: els.articleTitle.value,
+    showTitle: els.showTitle.checked,
     source: els.source.value
   };
   localStorage.setItem(draftKey, JSON.stringify(draft));
@@ -553,11 +685,13 @@ function loadDraft() {
   if (!raw) return false;
   try {
     const draft = JSON.parse(raw);
-    els.mode.value = draft.mode || "html";
+    els.mode.value = draft.mode || "mixed";
     els.width.value = draft.width || "640";
     els.sanitize.checked = draft.sanitize !== false;
     els.inline.checked = draft.inline !== false;
     els.frame.checked = draft.frame !== false;
+    els.articleTitle.value = draft.articleTitle || "";
+    els.showTitle.checked = draft.showTitle === true;
     els.source.value = draft.source || "";
     return true;
   } catch {
@@ -568,6 +702,8 @@ function loadDraft() {
 
 function clearAll() {
   els.source.value = "";
+  els.articleTitle.value = "";
+  els.showTitle.checked = false;
   localStorage.removeItem(draftKey);
   convert();
   setState("已清空");
@@ -588,6 +724,7 @@ async function pasteFromClipboard() {
 
 function loadHtmlSample() {
   els.mode.value = "html";
+  els.articleTitle.value = "普通人如何读懂财经新闻？";
   els.source.value = sampleHtml;
   convert();
   saveDraft();
@@ -596,14 +733,24 @@ function loadHtmlSample() {
 
 function loadMarkdownSample() {
   els.mode.value = "markdown";
+  els.articleTitle.value = "普通人如何读懂财经新闻？";
   els.source.value = sampleMarkdown;
   convert();
   saveDraft();
   showToast("Markdown 示例已载入");
 }
 
+function loadMixedSample() {
+  els.mode.value = "mixed";
+  els.articleTitle.value = "HTML 和 Markdown 混合内容怎么发公众号？";
+  els.source.value = sampleMixed;
+  convert();
+  saveDraft();
+  showToast("混合示例已载入");
+}
+
 ["input", "change"].forEach((eventName) => {
-  [els.mode, els.width, els.sanitize, els.inline, els.frame, els.source].forEach((el) => {
+  [els.mode, els.width, els.sanitize, els.inline, els.frame, els.articleTitle, els.showTitle, els.source].forEach((el) => {
     el.addEventListener(eventName, () => {
       saveDraft();
       convert();
@@ -619,12 +766,23 @@ els.convert.addEventListener("click", () => {
 els.copyRich.addEventListener("click", () => copyRichText().catch(() => showToast("复制被浏览器拦截，请手动选中预览区复制")));
 els.copyRich2.addEventListener("click", () => copyRichText().catch(() => showToast("复制被浏览器拦截，请手动选中预览区复制")));
 els.copyHtml.addEventListener("click", () => copyHtml().catch(() => showToast("复制 HTML 失败")));
+els.copyTitle.addEventListener("click", () => {
+  const title = els.articleTitle.value.trim();
+  if (!title) {
+    showToast("请先填写文章标题");
+    return;
+  }
+  navigator.clipboard.writeText(title)
+    .then(() => showToast("文章标题已复制"))
+    .catch(() => showToast("复制标题失败，请手动复制"));
+});
 els.exportBtn.addEventListener("click", exportHtml);
 els.clear.addEventListener("click", clearAll);
 els.selectPreview.addEventListener("click", selectPreview);
 els.paste.addEventListener("click", pasteFromClipboard);
 els.sampleHtml.addEventListener("click", loadHtmlSample);
 els.sampleMd.addEventListener("click", loadMarkdownSample);
+els.sampleMixed.addEventListener("click", loadMixedSample);
 
 window.addEventListener("beforeunload", saveDraft);
 

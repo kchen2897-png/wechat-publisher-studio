@@ -209,6 +209,40 @@ kbd {
   padding: 11px 12px;
 }
 
+.title-box {
+  margin: 0 0 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #f8fbfa);
+}
+
+.title-field {
+  margin-bottom: 12px;
+}
+
+.title-field textarea {
+  min-height: 72px;
+  resize: vertical;
+  font-size: 18px;
+  font-weight: 850;
+  line-height: 1.55;
+  color: #132f33;
+}
+
+.title-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.check.compact {
+  min-height: 40px;
+  margin-left: auto;
+}
+
 .field select:focus,
 .field textarea:focus {
   border-color: var(--primary);
@@ -285,6 +319,29 @@ kbd {
   font-size: 14px;
   font-weight: 750;
   line-height: 1.6;
+}
+
+.title-preview {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+}
+
+.title-preview b {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--primary);
+  font-size: 13px;
+}
+
+.title-preview p {
+  margin: 0;
+  color: #132f33;
+  font-size: 18px;
+  line-height: 1.55;
+  font-weight: 850;
 }
 
 .phone-shell {
@@ -377,6 +434,15 @@ kbd {
   .control-grid,
   .option-row {
     grid-template-columns: 1fr;
+  }
+
+  .title-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .check.compact {
+    margin-left: 0;
   }
 
   .input-panel,
