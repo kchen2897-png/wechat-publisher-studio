@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>公众号富文本转换器</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">微</span>
+        <div>
+          <h1>公众号富文本转换器</h1>
+          <p>把 HTML / CSS / Markdown 转成微信公众平台可粘贴内容</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="ghost" id="pasteBtn" type="button">粘贴代码</button>
+        <button class="ghost" id="sampleHtmlBtn" type="button">HTML示例</button>
+        <button class="ghost" id="sampleMdBtn" type="button">Markdown示例</button>
+        <button class="primary" id="copyRichBtn" type="button">复制到公众号</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="panel input-panel" aria-label="代码输入区">
+        <div class="panel-head">
+          <div>
+            <h2>输入代码</h2>
+            <p>粘贴完整 HTML、带 CSS 的代码片段、Markdown 或普通正文。</p>
+          </div>
+          <span id="stateText">等待输入</span>
+        </div>
+
+        <div class="control-grid">
+          <label class="field">
+            <span>输入类型</span>
+            <select id="modeSelect">
+              <option value="html">HTML / CSS 代码</option>
+              <option value="markdown">Markdown 正文</option>
+              <option value="text">纯文本分段</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>预览宽度</span>
+            <select id="widthSelect">
+              <option value="640">公众号正文宽度</option>
+              <option value="375">手机窄屏</option>
+              <option value="720">宽屏检查</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="option-row">
+          <label class="check">
+            <input id="sanitizeToggle" type="checkbox" checked>
+            <span>清理脚本和危险属性</span>
+          </label>
+          <label class="check">
+            <input id="inlineToggle" type="checkbox" checked>
+            <span>把 CSS 转成内联样式</span>
+          </label>
+          <label class="check">
+            <input id="frameToggle" type="checkbox" checked>
+            <span>添加公众号安全外框</span>
+          </label>
+        </div>
+
+        <label class="field code-field">
+          <span>代码 / 正文</span>
+          <textarea id="sourceInput" spellcheck="false" placeholder="把 HTML、CSS、Markdown 或纯文本粘贴到这里..."></textarea>
+        </label>
+
+        <div class="button-row">
+          <button class="secondary" id="convertBtn" type="button">转换预览</button>
+          <button class="ghost" id="copyHtmlBtn" type="button">复制HTML</button>
+          <button class="ghost" id="exportBtn" type="button">导出HTML</button>
+          <button class="ghost danger" id="clearBtn" type="button">清空</button>
+        </div>
+
+        <aside class="tips">
+          <h3>怎么用</h3>
+          <ol>
+            <li>把代码粘到左侧，点击“转换预览”。</li>
+            <li>确认右侧预览效果。</li>
+            <li>点击“复制到公众号”。</li>
+            <li>到微信公众平台正文编辑区按 <kbd>Ctrl</kbd> + <kbd>V</kbd>。</li>
+          </ol>
+          <p>注意：公众号封面图仍需在后台单独上传；正文里的本地图片路径通常无法直接带过去。</p>
+        </aside>
+      </section>
+
+      <section class="panel preview-panel" aria-label="公众号预览区">
+        <div class="panel-head">
+          <div>
+            <h2>公众号富文本预览</h2>
+            <p>这里显示的是复制到公众号后台前的渲染效果。</p>
+          </div>
+          <div class="preview-actions">
+            <button class="ghost" id="selectPreviewBtn" type="button">选中预览</button>
+            <button class="primary" id="copyRichBtn2" type="button">复制到公众号</button>
+          </div>
+        </div>
+
+        <div class="notice" id="notice">
+          已为你准备好通用转换器。粘贴代码后，右侧会生成可复制的富文本。
+        </div>
+
+        <div class="phone-shell">
+          <article id="wechatOutput" class="wechat-output"></article>
+        </div>
+      </section>
+    </main>
+
+    <div id="hiddenRender" aria-hidden="true"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
