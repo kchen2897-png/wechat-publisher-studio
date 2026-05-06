@@ -145,7 +145,7 @@
         </div>
 
         <!-- Workbench Layout (visible when workbench ON) -->
-        <div id="workbenchContainer" style="display:none;flex:1;flex-direction:column;min-height:0;">
+        <div id="workbenchContainer" style="display:none;flex-direction:column;gap:12px;flex:1;min-height:0;">
           <div class="workbench-layout">
             <!-- Block List -->
             <div class="block-list-panel">
@@ -177,7 +177,7 @@
           </div>
 
           <!-- Block Controls (below block list + preview) -->
-          <div class="block-controls-panel" id="blockControlsPanel" style="margin-top:12px;flex:0 0 auto;max-height:320px;">
+          <div class="block-controls-panel" id="blockControlsPanel" style="flex:0 0 auto;max-height:320px;">
             <div class="block-controls-header">
               块排版设置
               <span style="font-size:10px;color:var(--text-muted);font-weight:400;" id="selectedBlockLabel">— 请先选择一个块</span>
