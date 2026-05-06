@@ -13,24 +13,25 @@
         <span class="brand-mark">微</span>
         <div>
           <h1>公众号富文本转换器</h1>
-          <p>把 HTML / CSS / Markdown 转成微信公众平台可粘贴内容</p>
+          <p>HTML / CSS / Markdown 转微信公众平台富文本</p>
         </div>
       </div>
       <div class="top-actions">
-        <button class="ghost" id="pasteBtn" type="button">粘贴代码</button>
-        <button class="ghost" id="sampleHtmlBtn" type="button">HTML示例</button>
-        <button class="ghost" id="sampleMdBtn" type="button">Markdown示例</button>
-        <button class="ghost" id="sampleMixedBtn" type="button">混合示例</button>
-        <button class="primary" id="copyRichBtn" type="button">复制到公众号</button>
+        <button class="btn btn-ghost" id="pasteBtn" type="button">从剪贴板粘贴</button>
+        <button class="btn btn-ghost" id="sampleHtmlBtn" type="button">HTML 示例</button>
+        <button class="btn btn-ghost" id="sampleMdBtn" type="button">Markdown 示例</button>
+        <button class="btn btn-ghost" id="sampleMixedBtn" type="button">混合示例</button>
+        <button class="btn btn-primary" id="copyRichBtn" type="button">复制到公众号</button>
       </div>
     </header>
 
     <main class="workspace">
+      <!-- ═══════════ LEFT: Input Panel ═══════════ -->
       <section class="panel input-panel" aria-label="代码输入区">
         <div class="panel-head">
           <div>
             <h2>输入代码</h2>
-            <p>粘贴完整 HTML、带 CSS 的代码片段、Markdown、混合内容或普通正文。</p>
+            <p>粘贴 HTML、CSS、Markdown 或混合内容</p>
           </div>
           <span id="stateText">等待输入</span>
         </div>
@@ -41,8 +42,8 @@
             <textarea id="articleTitleInput" rows="2" placeholder="这里单独填写公众号文章标题，可随时修改"></textarea>
           </label>
           <div class="title-actions">
-            <button class="ghost" id="copyTitleBtn" type="button">复制标题</button>
-            <label class="check compact">
+            <button class="btn btn-ghost btn-xs" id="copyTitleBtn" type="button">复制标题</button>
+            <label class="check" style="margin-bottom:0;padding:8px 10px;">
               <input id="showTitleToggle" type="checkbox">
               <span>同时显示在正文顶部</span>
             </label>
@@ -59,7 +60,6 @@
               <option value="text">纯文本分段</option>
             </select>
           </label>
-
           <label class="field">
             <span>预览宽度</span>
             <select id="widthSelect">
@@ -77,7 +77,7 @@
           </label>
           <label class="check">
             <input id="inlineToggle" type="checkbox" checked>
-            <span>把 CSS 转成内联样式</span>
+            <span>CSS 转内联样式</span>
           </label>
           <label class="check">
             <input id="frameToggle" type="checkbox" checked>
@@ -91,47 +91,101 @@
         </label>
 
         <div class="button-row">
-          <button class="secondary" id="convertBtn" type="button">转换预览</button>
-          <button class="ghost" id="copyHtmlBtn" type="button">复制HTML</button>
-          <button class="ghost" id="exportBtn" type="button">导出HTML</button>
-          <button class="ghost danger" id="clearBtn" type="button">清空</button>
+          <button class="btn btn-secondary" id="convertBtn" type="button">转换预览</button>
+          <button class="btn btn-ghost" id="copyHtmlBtn" type="button">复制 HTML</button>
+          <button class="btn btn-ghost" id="exportBtn" type="button">导出 HTML</button>
+          <button class="btn btn-danger" id="clearBtn" type="button">清空</button>
         </div>
 
         <aside class="tips">
           <h3>怎么用</h3>
           <ol>
-            <li>标题填在“文章标题”，正文代码粘到“代码 / 正文”。</li>
-            <li>如果内容里既有 HTML 又有 Markdown，选择“智能混合”。</li>
-            <li>点击“转换预览”，确认右侧效果。</li>
-            <li>点击“复制到公众号”，到微信公众平台正文编辑区按 <kbd>Ctrl</kbd> + <kbd>V</kbd>。</li>
+            <li>标题填在"文章标题"，正文代码粘到"代码 / 正文"。</li>
+            <li>如果内容里既有 HTML 又有 Markdown，选择"智能混合"。</li>
+            <li>点击"转换预览"，确认右侧效果。</li>
+            <li>点击"复制到公众号"，到微信公众平台正文编辑区按 <kbd>Ctrl</kbd> + <kbd>V</kbd>。</li>
           </ol>
           <p>注意：公众号封面图仍需在后台单独上传；正文里的本地图片路径通常无法直接带过去。</p>
         </aside>
       </section>
 
+      <!-- ═══════════ RIGHT: Preview / Workbench Panel ═══════════ -->
       <section class="panel preview-panel" aria-label="公众号预览区">
         <div class="panel-head">
           <div>
             <h2>公众号富文本预览</h2>
-            <p>这里显示的是复制到公众号后台前的渲染效果。</p>
+            <p>这是复制到公众号后台前的渲染效果</p>
           </div>
           <div class="preview-actions">
-            <button class="ghost" id="selectPreviewBtn" type="button">选中预览</button>
-            <button class="primary" id="copyRichBtn2" type="button">复制到公众号</button>
+            <button class="btn btn-ghost" id="selectPreviewBtn" type="button">选中预览</button>
+            <button class="btn btn-primary" id="copyRichBtn2" type="button">复制到公众号</button>
           </div>
         </div>
 
-        <div class="title-preview">
-          <b>文章标题</b>
-          <p id="articleTitlePreview">未填写标题</p>
+        <!-- Workbench Toggle -->
+        <div class="workbench-toggle-row" style="margin-bottom:14px;">
+          <label class="toggle-switch">
+            <input id="workbenchToggle" type="checkbox">
+            <span class="toggle-track"></span>
+            <span>工作台模式</span>
+          </label>
+          <span style="font-size:11px;color:var(--text-muted);">拖拽排序、调整间距与对齐</span>
         </div>
 
-        <div class="notice" id="notice">
-          已准备好通用转换器。粘贴代码后，右侧会生成可复制的富文本。
+        <!-- Normal Preview (visible when workbench OFF) -->
+        <div id="normalPreview">
+          <div class="title-preview">
+            <b>文章标题</b>
+            <p id="articleTitlePreview">未填写标题</p>
+          </div>
+          <div class="notice" id="notice">已准备好通用转换器。粘贴代码后，这里会生成可复制的富文本。</div>
+          <div class="phone-shell">
+            <article id="wechatOutput" class="wechat-output"></article>
+          </div>
         </div>
 
-        <div class="phone-shell">
-          <article id="wechatOutput" class="wechat-output"></article>
+        <!-- Workbench Layout (visible when workbench ON) -->
+        <div id="workbenchContainer" style="display:none;flex:1;flex-direction:column;min-height:0;">
+          <div class="workbench-layout">
+            <!-- Block List -->
+            <div class="block-list-panel">
+              <div class="block-list-header">内容块列表</div>
+              <div class="block-toolbar">
+                <button class="add-block-btn" data-type="heading" title="添加标题">H</button>
+                <button class="add-block-btn" data-type="subheading" title="添加副标题">h</button>
+                <button class="add-block-btn" data-type="paragraph" title="添加段落">¶</button>
+                <button class="add-block-btn" data-type="quote" title="添加引用">❝</button>
+                <button class="add-block-btn" data-type="card" title="添加卡片">◻</button>
+                <button class="add-block-btn" data-type="divider" title="添加分割线">—</button>
+                <button class="add-block-btn" data-type="image" title="添加图片">🖼</button>
+              </div>
+              <div class="block-list" id="blockList">
+                <div class="block-list-empty">转换后内容块将显示在这里<br>点击上方按钮添加自定义块</div>
+              </div>
+            </div>
+
+            <!-- Live Preview -->
+            <div class="workbench-preview">
+              <div class="workbench-preview-header" style="display:flex;align-items:center;justify-content:space-between;">
+                <span>实时预览</span>
+                <button class="btn btn-ghost btn-xs" id="resetBlocksBtn" type="button">恢复默认</button>
+              </div>
+              <div class="workbench-preview-body">
+                <div class="workbench-live-output" id="workbenchLiveOutput"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Block Controls (below block list + preview) -->
+          <div class="block-controls-panel" id="blockControlsPanel" style="margin-top:12px;flex:0 0 auto;max-height:320px;">
+            <div class="block-controls-header">
+              块排版设置
+              <span style="font-size:10px;color:var(--text-muted);font-weight:400;" id="selectedBlockLabel">— 请先选择一个块</span>
+            </div>
+            <div class="block-controls-body" id="blockControlsBody">
+              <div class="no-block-selected">点击左侧内容块来调整它的间距和对齐方式</div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
